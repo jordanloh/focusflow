@@ -66,9 +66,7 @@ export default function MainPage() {
             <BottomTab icon="home" label="Home" />
             <BottomTab icon="calendar" label="Timetable" />
             <BottomTab icon="leaf" label="Rewards" />
-            <TouchableOpacity onPress={handleProfilePress} style={styles.tabLabel}>
-                <BottomTab icon="user" label="Profile" />
-            </TouchableOpacity>
+            <ProfilePage />
         </View>
      </View>
     </SafeAreaView>
@@ -88,6 +86,21 @@ const ToDoList = () => {
     />
   )
 };
+
+const ProfilePage = () => {
+  const navigation = useNavigation();
+  const ProfilePagePressed = () => {
+    console.log("Profile Page pressed");
+    navigation.navigate("AccountPage");
+  }
+  return (
+    <BottomTab
+      icon="user"
+      label="Profile"
+      onPress={ProfilePagePressed}
+    />
+  )
+}
 
 const styles = StyleSheet.create({
   safeArea: {

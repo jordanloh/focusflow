@@ -1,5 +1,6 @@
 import { Button, Input } from '@rneui/themed'
 import { User } from '@supabase/supabase-js'
+import { useNavigation } from 'expo-router'
 import { useEffect, useState } from 'react'
 import { Alert, StyleSheet, View } from 'react-native'
 import { supabase } from '../lib/supabase'
@@ -98,9 +99,21 @@ export default function Account({ user }: { user: User }) {
       </View>
 
       <View style={styles.verticallySpaced}>
-        <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
+        <SignOutButton />
       </View>
     </View>
+  )
+}
+
+const SignOutButton = () => {
+  supabase.auth.signOut();
+  const navigation = useNavigation();
+  const signOutButtonPressed = () => {
+    console.log("Sign Out Button pressed");
+    navigation.navigate("LoginPage");
+  }
+  return (
+    <Button title="Sign Out" onPress={signOutButtonPressed} />
   )
 }
 
