@@ -110,7 +110,7 @@ const SignOutButton = () => {
   const navigation = useNavigation();
   const signOutButtonPressed = () => {
     console.log("Sign Out Button pressed");
-    navigation.navigate("LoginPage");
+    navigation.navigate('Auth' as never);
   }
   return (
     <Button title="Sign Out" onPress={signOutButtonPressed} />

@@ -1,17 +1,16 @@
+import { useNavigation } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { supabase } from '../lib/supabase';
 
-export default function Auth({
-  navigation,
-  onSuccessfulLogin,
-}: {
-  navigation: any;
-  onSuccessfulLogin: () => void;
-}) {
+export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigation = useNavigation();
+  const onSuccessfulLogin = () => {
+    navigation.navigate('index' as never);
+  }
 
   const signInWithEmail = async () => {
     setLoading(true);
