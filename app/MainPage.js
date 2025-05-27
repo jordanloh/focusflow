@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from 'expo-router';
 import React from "react";
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import BottomTab from "./components/BottomTab";
@@ -37,7 +37,7 @@ export default function MainPage() {
 
           <View style={styles.navRow}>
             <NavButton icon="cutlery" label="Focus!" />
-            <NavButton icon="list" label="To-do List" />
+            <ToDoList />
             <NavButton icon="book" label="Backyard" />
             <NavButton icon="eye" label="See More" />
           </View>
@@ -74,7 +74,20 @@ export default function MainPage() {
     </SafeAreaView>
   );
 }
-
+const ToDoList = () => {
+  const navigation = useNavigation();
+  const ToDoListPressed = () => {
+    console.log("To-do List pressed");
+    navigation.navigate("todolist");
+  }
+  return (
+    <NavButton 
+      icon="list" 
+      label="To-do List" 
+      onPress={ToDoListPressed}
+    />
+  )
+};
 
 const styles = StyleSheet.create({
   safeArea: {
