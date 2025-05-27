@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { useNavigation } from "expo-router";
 import React from "react";
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import BottomTab from "./components/BottomTab";
@@ -18,7 +19,7 @@ export default function Index() {
                 <MaterialCommunityIcons name="account-circle" size={45} color="black" />
               </TouchableOpacity>
               <Text style={styles.welcome}>Welcome!</Text>
-              //Change to user's name after making profile  
+              {/* Change to user's name after making profile */}
               <Text style={styles.username}>JOHN DOE</Text>
             </View>
             <TouchableOpacity style={styles.bellIcon}>
@@ -28,7 +29,7 @@ export default function Index() {
 
           <View style={styles.navRow}>
             <NavButton icon="cutlery" label="Focus!" />
-            <NavButton icon="list" label="To-do List" />
+            <ToDoList />
             <NavButton icon="book" label="Backyard" />
             <NavButton icon="eye" label="See More" />
           </View>
@@ -64,6 +65,20 @@ export default function Index() {
   );
 }
 
+const ToDoList = () => {
+  const navigation = useNavigation();
+  const ToDoListPressed = () => {
+    console.log("To-do List pressed");
+    navigation.navigate("todolist");
+  }
+  return (
+    <NavButton 
+      icon="list" 
+      label="To-do List" 
+      onPress={ToDoListPressed}
+    />
+  )
+};
 
 const styles = StyleSheet.create({
   safeArea: {
