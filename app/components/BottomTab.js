@@ -1,13 +1,13 @@
 import { FontAwesome } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 const BottomTab = ({ icon, label }) => {
   return (
-    <TouchableOpacity style={styles.tabButton}>
+    <View style={styles.tabButton}>
       <FontAwesome name={icon} size={20} color="white" />
       <Text style={styles.tabLabel}>{label}</Text>
-    </TouchableOpacity>
+    </View>
   );
 }
 
