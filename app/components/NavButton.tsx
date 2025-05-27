@@ -2,9 +2,15 @@ import { FontAwesome } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
-const NavButton = ({ icon, label }) => {
+interface NavButtonProps {
+  icon: keyof typeof FontAwesome.glyphMap;
+  label: string;
+  onPress?: () => void;
+}
+
+const NavButton: React.FC<NavButtonProps> = ({ icon, label, onPress }) => {
   return (
-    <TouchableOpacity style={styles.navButton}>
+    <TouchableOpacity style={styles.navButton} onPress={onPress}>
       <FontAwesome name={icon} size={20} color="#003049" />
       <Text style={styles.navLabel}>{label}</Text>
     </TouchableOpacity>
@@ -22,4 +28,4 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#003049',
   },
-});
+}); 

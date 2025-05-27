@@ -2,7 +2,13 @@ import { FontAwesome } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
-const BottomTab = ({ icon, label }) => {
+interface BottomTabProps {
+  icon: keyof typeof FontAwesome.glyphMap;
+  label: string;
+  active?: boolean;
+}
+
+const BottomTab: React.FC<BottomTabProps> = ({ icon, label, active }) => {
   return (
     <TouchableOpacity style={styles.tabButton}>
       <FontAwesome name={icon} size={20} color="white" />
@@ -22,4 +28,4 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
   },
-});
+}); 
