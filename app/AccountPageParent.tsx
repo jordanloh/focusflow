@@ -1,4 +1,3 @@
-// In some parent or layout
 import { Session } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
@@ -19,5 +18,5 @@ export default function AccountPageParent() {
   }
 }, [])
 
-    return <AccountPage session={session || null} />  
+  return session ? <AccountPage session={session} /> : null
 }
