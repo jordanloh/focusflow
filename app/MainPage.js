@@ -1,11 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from "react";
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { supabase } from "../lib/supabase";
 import BottomTab from "./components/BottomTab";
 import NavButton from "./components/NavButton";
+import ProfilePic from "./components/ProfilePic";
 import ScheduleItem from "./components/ScheduleItem";
 import ToDoCard from "./components/ToDoCard";
 
@@ -42,7 +42,9 @@ export default function MainPage() {
     }
     return (
       <TouchableOpacity style={styles.profilePic} onPress={ProfilePagePressed}>
-        <MaterialCommunityIcons name="account-circle" size={45} color="black" />
+        <View style={styles.profilePicContainer}>
+          <ProfilePic userId={user?.id} />
+        </View>
       </TouchableOpacity>
     )
   }
@@ -52,7 +54,7 @@ export default function MainPage() {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
             <View style={styles.profileSection}>
-              <ProfilePagePicIcon />
+              <ProfilePagePicIcon/>
               <Text style={styles.welcome}>Welcome!</Text>
               <Text style={styles.username}>{user?.user_metadata?.username || user?.email}</Text>
             </View>
@@ -115,6 +117,21 @@ const ToDoList = () => {
 
 
 const styles = StyleSheet.create({
+  profilePicImage: {
+    width: 45,
+    height: 45,
+    borderRadius: 22.5,
+  },
+  profilePicContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  profilePicNoImage: { 
+    width: 45,
+    height: 45,
+    borderRadius: 22.5,
+    backgroundColor: "#003049",
+  },
   safeArea: {
     flex: 1,
     backgroundColor: "#f7f7f7",

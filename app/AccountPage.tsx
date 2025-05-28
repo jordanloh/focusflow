@@ -4,6 +4,7 @@ import { useNavigation } from 'expo-router'
 import { useEffect, useState } from 'react'
 import { Alert, StyleSheet, View } from 'react-native'
 import { supabase } from '../lib/supabase'
+import Avatar from './Avatar'
 
 export default function AccountPage( {session}: {session: Session}) {
   const [loading, setLoading] = useState(true)
@@ -83,6 +84,11 @@ export default function AccountPage( {session}: {session: Session}) {
       if (error) {
         throw error
       }
+      const { error: authError } = await supabase.auth.updateUser({
+        data: { avatar_url },
+      })
+      if (authError) throw authError
+  
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert(error.message)
@@ -94,6 +100,16 @@ export default function AccountPage( {session}: {session: Session}) {
 
   return (
     <View style={styles.container}>
+      <View style={styles.avatarContainer}>
+        <Avatar
+          size={100}
+          url={avatarUrl}
+          onUpload={(url: string) => {
+            setAvatarUrl(url)
+            updateProfile({ username, avatar_url: url })
+          }}
+        />
+      </View>
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Input label="Email" value={email} disabled />
       </View>
@@ -119,6 +135,10 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 40,
     padding: 12,
+  },
+  avatarContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
   },
   verticallySpaced: {
     paddingTop: 4,
