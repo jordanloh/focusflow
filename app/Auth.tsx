@@ -1,15 +1,25 @@
 import { useNavigation } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, AppState, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { supabase } from '../lib/supabase';
+
+AppState.addEventListener("change", (state) => {
+  if (state == "active") {
+    supabase.auth.startAutoRefresh();
+  } else {
+    supabase.auth.stopAutoRefresh();
+  }
+})
 
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+
   const onSuccessfulLogin = () => {
-    navigation.navigate('index' as never);
+    navigation.navigate("MainPage" as never);
+    console.log("Logged in");
   }
 
   const signInWithEmail = async () => {

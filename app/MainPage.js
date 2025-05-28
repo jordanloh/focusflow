@@ -1,34 +1,60 @@
 import { Ionicons } from "@expo/vector-icons";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { useNavigation } from 'expo-router';
-import React from "react";
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from "react";
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { supabase } from "../lib/supabase";
 import BottomTab from "./components/BottomTab";
 import NavButton from "./components/NavButton";
 import ScheduleItem from "./components/ScheduleItem";
 import ToDoCard from "./components/ToDoCard";
 
 export default function MainPage() {
-  const navigation = useNavigation();
-
-  const handleProfilePress = () => {
-    if (navigation && navigation.navigate) {
-      navigation.navigate('Account');
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    async function fetchUser() {
+      const { data } = await supabase.auth.getUser();
+      setUser(data.user);
     }
-  };
+    fetchUser();
+  }, []);
 
+  const ProfilePageBottomTab = () => {
+    const router = useRouter();
+    const ProfilePagePressed = () => {
+      console.log("Profile Page pressed");
+      router.push("/AccountPageParent");
+    }
+    return (
+      <BottomTab
+        icon="user"
+        label="Profile"
+        onPress={ProfilePagePressed}
+      />
+    )
+  }
+  
+  const ProfilePagePicIcon = () => {
+    const router = useRouter();
+    const ProfilePagePressed = () => {
+      console.log("Profile Page pressed");
+      router.push("/AccountPageParent");
+    }
+    return (
+      <TouchableOpacity style={styles.profilePic} onPress={ProfilePagePressed}>
+        <MaterialCommunityIcons name="account-circle" size={45} color="black" />
+      </TouchableOpacity>
+    )
+  }
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea}> 
       <View style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
             <View style={styles.profileSection}>
-              <TouchableOpacity style={styles.profilePic}>
-                <MaterialCommunityIcons name="account-circle" size={45} color="black" />
-              </TouchableOpacity>
+              <ProfilePagePicIcon />
               <Text style={styles.welcome}>Welcome!</Text>
-              {/* Change to user's name after making profile   */}
-              <Text style={styles.username}>JOHN DOE</Text>
+              <Text style={styles.username}>{user?.user_metadata?.username || user?.email}</Text>
             </View>
             <TouchableOpacity style={styles.bellIcon}>
               <Ionicons name="notifications" size={24} color="white" />
@@ -66,17 +92,17 @@ export default function MainPage() {
             <BottomTab icon="home" label="Home" />
             <BottomTab icon="calendar" label="Timetable" />
             <BottomTab icon="leaf" label="Rewards" />
-            <ProfilePage />
+            <ProfilePageBottomTab />
         </View>
      </View>
     </SafeAreaView>
   );
 }
 const ToDoList = () => {
-  const navigation = useNavigation();
+  const router = useRouter();
   const ToDoListPressed = () => {
     console.log("To-do List pressed");
-    navigation.navigate("todolist");
+    router.push("/todolist");
   }
   return (
     <NavButton 
@@ -87,20 +113,6 @@ const ToDoList = () => {
   )
 };
 
-const ProfilePage = () => {
-  const navigation = useNavigation();
-  const ProfilePagePressed = () => {
-    console.log("Profile Page pressed");
-    navigation.navigate("AccountPage");
-  }
-  return (
-    <BottomTab
-      icon="user"
-      label="Profile"
-      onPress={ProfilePagePressed}
-    />
-  )
-}
 
 const styles = StyleSheet.create({
   safeArea: {

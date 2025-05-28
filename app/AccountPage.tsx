@@ -1,29 +1,46 @@
 import { Button, Input } from '@rneui/themed'
-import { User } from '@supabase/supabase-js'
+import { Session } from '@supabase/supabase-js'
 import { useNavigation } from 'expo-router'
 import { useEffect, useState } from 'react'
 import { Alert, StyleSheet, View } from 'react-native'
 import { supabase } from '../lib/supabase'
 
-export default function Account({ user }: { user: User }) {
+export default function AccountPage( {session}: {session: Session}) {
   const [loading, setLoading] = useState(true)
   const [username, setUsername] = useState('')
-  const [website, setWebsite] = useState('')
+  const [email, setEmail] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
 
+  const SignOutButton = () => {
+    const navigation = useNavigation();
+    const signOutButtonPressed = async () => {
+      await supabase.auth.signOut();
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Auth' as never }],
+      });
+      console.log("Sign Out Button pressed");
+    }
+    return (
+      <Button title="Sign Out" onPress={signOutButtonPressed} />
+    )
+  }
   useEffect(() => {
-    if (user) getProfile()
-  }, [user])
+    if (session?.user) {
+      setEmail(session.user.email || '')
+      getProfile()
+    }
+  }, [session])
 
   async function getProfile() {
     try {
       setLoading(true)
-      if (!user) throw new Error('No user!')
+      if (!session?.user) throw new Error('No user on the session!')
 
       const { data, error, status } = await supabase
         .from('profiles')
-        .select(`username, website, avatar_url`)
-        .eq('id', user.id)
+        .select(`username, avatar_url`)
+        .eq('id', session?.user.id)
         .single()
       if (error && status !== 406) {
         throw error
@@ -31,8 +48,8 @@ export default function Account({ user }: { user: User }) {
 
       if (data) {
         setUsername(data.username)
-        setWebsite(data.website)
         setAvatarUrl(data.avatar_url)
+        setEmail(session.user.email || '')
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -45,21 +62,18 @@ export default function Account({ user }: { user: User }) {
 
   async function updateProfile({
     username,
-    website,
     avatar_url,
   }: {
     username: string
-    website: string
     avatar_url: string
   }) {
     try {
       setLoading(true)
-      if (!user) throw new Error('No user!')
+      if (!session?.user) throw new Error('No user on the session!')
 
       const updates = {
-        id: user.id,
+        id: session?.user.id,
         username,
-        website,
         avatar_url,
         updated_at: new Date(),
       }
@@ -81,19 +95,15 @@ export default function Account({ user }: { user: User }) {
   return (
     <View style={styles.container}>
       <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Input label="Email" value={user?.email} disabled />
+        <Input label="Email" value={email} disabled />
       </View>
       <View style={styles.verticallySpaced}>
         <Input label="Username" value={username || ''} onChangeText={(text) => setUsername(text)} />
       </View>
       <View style={styles.verticallySpaced}>
-        <Input label="Website" value={website || ''} onChangeText={(text) => setWebsite(text)} />
-      </View>
-
-      <View style={[styles.verticallySpaced, styles.mt20]}>
         <Button
           title={loading ? 'Loading ...' : 'Update'}
-          onPress={() => updateProfile({ username, website, avatar_url: avatarUrl })}
+          onPress={() => updateProfile({ username, avatar_url: avatarUrl })}
           disabled={loading}
         />
       </View>
@@ -102,18 +112,6 @@ export default function Account({ user }: { user: User }) {
         <SignOutButton />
       </View>
     </View>
-  )
-}
-
-const SignOutButton = () => {
-  supabase.auth.signOut();
-  const navigation = useNavigation();
-  const signOutButtonPressed = () => {
-    console.log("Sign Out Button pressed");
-    navigation.navigate('Auth' as never);
-  }
-  return (
-    <Button title="Sign Out" onPress={signOutButtonPressed} />
   )
 }
 
