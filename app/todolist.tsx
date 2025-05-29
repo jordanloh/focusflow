@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import Checkbox from "expo-checkbox";
-import React, { useCallback, useState } from "react";
+import { Dispatch, memo, SetStateAction, useCallback, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, RefreshControl, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { supabase } from "../lib/supabase";
 import BottomTab from "./components/BottomTab";
@@ -14,13 +14,11 @@ interface Todo {
   created_at: string;
 }
 
-// Custom hook for managing todos and Supabase interactions
 function useTodos() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Fetch todos from Supabase
   const fetchTodos = async () => {
     try {
       if (!refreshing && todos.length === 0) setLoading(true);
@@ -47,7 +45,6 @@ function useTodos() {
     }
   };
 
-  // Subscribe to realtime changes in Supabase
   const subscribeToRealtime = () => {
     return supabase
       .channel("todos")
@@ -79,8 +76,7 @@ function useTodos() {
       .subscribe();
   };
 
-  // Add a new todo
-  const addTodo = async (newTodoText: string, setNewTodo: React.Dispatch<React.SetStateAction<string>>) => {
+  const addTodo = async (newTodoText: string, setNewTodo: Dispatch<SetStateAction<string>>) => {
     const trimmed = newTodoText.trim();
     if (!trimmed) return;
     try {
@@ -98,7 +94,6 @@ function useTodos() {
     }
   };
 
-  // Toggle completed status of a todo
   const toggleTodo = async (id: string) => {
     const todo = todos.find((t) => t.id === id);
     if (!todo) return;
@@ -117,7 +112,6 @@ function useTodos() {
     }
   };
 
-  // Delete a todo
   const deleteTodo = async (id: string) => {
     try {
       const { error } = await supabase.from("todos").delete().eq("id", id);
@@ -144,7 +138,6 @@ function useTodos() {
 export default function TodoListScreen() {
   const [newTodo, setNewTodo] = useState("");
 
-  // Use custom hook for todo logic
   const {
     todos,
     loading,
@@ -182,6 +175,7 @@ export default function TodoListScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>To-Do List</Text>
@@ -205,7 +199,6 @@ export default function TodoListScreen() {
               )
             )
               .then(() => {
-                // Update state after deletion
                 deleteCompletedTodos();
               })
               .catch((error) => {
@@ -216,6 +209,7 @@ export default function TodoListScreen() {
           <Text style={styles.clearText}>Clear Completed</Text>
         </TouchableOpacity>
       </View>
+
       {/* Todo List */}
       <TodoList
         todos={todos}
@@ -233,21 +227,13 @@ export default function TodoListScreen() {
     </SafeAreaView>
   );
 
-  // Helper to remove completed todos from state after deletion
   function deleteCompletedTodos() {
-    // Filter out completed todos
     const filteredTodos = todos.filter((t) => !t.completed);
-    // Update state
-    // Using setTodos from useTodos is not directly accessible here,
-    // so we can update by refetching or by setting state here if exposed.
-    // For simplicity, refetch todos
     fetchTodos();
   }
 }
 
-// Components
-
-const AddTodoInput = React.memo(function AddTodoInput({
+const AddTodoInput = memo(function AddTodoInput({
   newTodo,
   setNewTodo,
   addTodo,
@@ -277,7 +263,7 @@ const AddTodoInput = React.memo(function AddTodoInput({
   );
 });
 
-const TodoItem = React.memo(({
+const TodoItem = memo(({
   item,
   toggleTodo,
   deleteTodo,
@@ -305,7 +291,7 @@ const TodoItem = React.memo(({
   </View>
 ));
 
-const TodoList = React.memo(({
+const TodoList = memo(({
   todos,
   toggleTodo,
   deleteTodo,
