@@ -1,10 +1,10 @@
+import Ionicon from '@expo/vector-icons/Ionicons'
 import { useEffect, useState } from 'react'
 import { Image } from 'react-native'
 import { supabase } from '../../lib/supabase'
 
 export default function ProfilePic({ userId }: { userId: string }) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
-  const defaultAvatar = require('../../assets/images/profile-picture.jpg')
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -54,10 +54,14 @@ export default function ProfilePic({ userId }: { userId: string }) {
   }, [userId])
 
   return (
-    <Image
-      source={avatarUrl ? { uri: avatarUrl } : defaultAvatar}
-      style={{ width: 40, height: 40, borderRadius: 20 }}
-    />
+    avatarUrl ? ( 
+      <Image
+        source={{ uri: avatarUrl }}
+        style={{ width: 40, height: 40, borderRadius: 20 }}
+      />
+    ) : (
+      <Ionicon name="person-circle-outline" size={40} color="#003049" />
+    )
   )
 }
 

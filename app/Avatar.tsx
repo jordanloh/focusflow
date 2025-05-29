@@ -1,8 +1,9 @@
 // from Supabase tutorial docs, not yet implemented
-import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
-import { StyleSheet, View, Alert, Image, Button } from 'react-native'
+import Ionicon from '@expo/vector-icons/Ionicons'
 import * as ImagePicker from 'expo-image-picker'
+import { useEffect, useState } from 'react'
+import { Alert, Button, Image, StyleSheet, View } from 'react-native'
+import { supabase } from '../lib/supabase'
 
 interface Props {
   size: number
@@ -98,7 +99,7 @@ export default function Avatar({ url, size = 150, onUpload }: Props) {
           style={[avatarSize, styles.avatar, styles.image]}
         />
       ) : (
-        <View style={[avatarSize, styles.avatar, styles.noImage]} />
+        <Ionicon name="person-circle-outline" size={size} color="#003049"/>
       )}
       <View>
         <Button
@@ -120,12 +121,5 @@ const styles = StyleSheet.create({
   image: {
     objectFit: 'cover',
     paddingTop: 0,
-  },
-  noImage: {
-    backgroundColor: '#333',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: 'rgb(200, 200, 200)',
-    borderRadius: 5,
   },
 })
