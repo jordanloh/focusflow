@@ -7,6 +7,7 @@ export default function ProfilePic({ userId }: { userId: string }) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!userId) return; 
     const fetchProfile = async () => {
       try {
         const { data, error } = await supabase
