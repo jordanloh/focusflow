@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useCallback, useState } from "react";
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { supabase } from "../lib/supabase";
 import BottomTab from "./components/BottomTab";
@@ -11,13 +11,22 @@ import ToDoCard from "./components/ToDoCard";
 
 export default function MainPage() {
   const [user, setUser] = useState(null);
-  useEffect(() => {
-    async function fetchUser() {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
-    }
-    fetchUser();
-  }, []);
+  const [username, setUsername] = useState(null);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUser = async () => {
+        const { data } = await supabase.auth.getUser();
+        setUser(data.user);
+        const { data: usernameData, error } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', data.user.id)
+          .single();
+        setUsername(usernameData?.username);
+      };
+      fetchUser();
+    }, [])
+  );
 
   const ProfilePageBottomTab = () => {
     const router = useRouter();
@@ -55,8 +64,10 @@ export default function MainPage() {
           <View style={styles.header}>
             <View style={styles.profileSection}>
               <ProfilePagePicIcon/>
-              <Text style={styles.welcome}>Welcome!</Text>
-              <Text style={styles.username}>{user?.user_metadata?.username || user?.email}</Text>
+              <View style={styles.profileText}>  
+                <Text style={styles.welcome}>Welcome!</Text>
+                <Text style={styles.username}>{username || user?.email}</Text>
+              </View>
             </View>
             <TouchableOpacity style={styles.bellIcon}>
               <Ionicons name="notifications" size={24} color="white" />
@@ -117,6 +128,10 @@ const ToDoList = () => {
 
 
 const styles = StyleSheet.create({
+  profileText: {
+    flexDirection: "column",
+    marginLeft: 10,
+  },
   profilePicImage: {
     width: 45,
     height: 45,
@@ -150,7 +165,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   profileSection: {
-    flexDirection: "column",
+    flexDirection: "row",
   },
   profilePic: {
     fontSize: 45,
