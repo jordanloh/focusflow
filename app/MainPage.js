@@ -1,8 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import React, { useCallback, useState } from "react";
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { supabase } from "../lib/supabase";
+import { fetchTodos } from '../lib/todoService';
 import BottomTab from "./components/BottomTab";
 import NavButton from "./components/NavButton";
 import ProfilePic from "./components/ProfilePic";
@@ -12,6 +14,8 @@ import ToDoCard from "./components/ToDoCard";
 export default function MainPage() {
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState(null);
+  const [todos, setTodos] = useState([]);
+  
   useFocusEffect(
     useCallback(() => {
       const fetchUser = async () => {
@@ -27,6 +31,29 @@ export default function MainPage() {
       fetchUser();
     }, [])
   );
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadTodos = async () => {
+        try {
+          const data = await fetchTodos();
+          setTodos(data);
+        } catch (e) {
+          console.error("Failed to fetch todos", e);
+        }
+      };
+      loadTodos();
+    }, [])
+  );
+
+  const groupTodosByModule = (todos) => {
+    const modules = {};
+    todos.forEach(todo => {
+      if (!modules[todo.module]) modules[todo.module] = [];
+      modules[todo.module].push(todo.text);
+    });
+    return Object.entries(modules).map(([module, items]) => ({ module, items }));
+  };
 
   const ProfilePageBottomTab = () => {
     const router = useRouter();
@@ -93,8 +120,13 @@ export default function MainPage() {
 
           <Text style={styles.sectionTitle}>To-do List</Text>
           <View style={styles.cardList}>
-            <ToDoCard module="ES2668" items={["Midterm Test", "Tutorial 2"]} />
-            <ToDoCard module="ES2660" items={["Update Weekly Journal", "Social Commentary"]} />
+            {todos.length === 0 ? (
+              <Text style={styles.doneText}>Well done! You're done with everything!</Text>
+            ) : (
+              groupTodosByModule(todos).map(({ module, items }) => (
+                <ToDoCard key={module} module={module} items={items} />
+              ))
+            )}
           </View>
           <TouchableOpacity>
             <Text style={styles.viewMore}>View More</Text>
@@ -178,6 +210,7 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 14,
     color: "#555",
+    marginLeft: 1,
   },
   bellIcon: {
     backgroundColor: "#003049",
@@ -216,5 +249,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 12,
     marginTop: 4,
+  },
+  doneText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2e7d32',
+    textAlign: 'center',
+    marginBottom: 5,
   },
 });
