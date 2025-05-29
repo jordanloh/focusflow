@@ -14,12 +14,13 @@ interface Todo {
   created_at: string;
 }
 
-export default function TodoListScreen() {
+// Custom hook for managing todos and Supabase interactions
+function useTodos() {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [newTodo, setNewTodo] = useState("");
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Fetch todos from Supabase
   const fetchTodos = async () => {
     try {
       if (!refreshing && todos.length === 0) setLoading(true);
@@ -46,6 +47,7 @@ export default function TodoListScreen() {
     }
   };
 
+  // Subscribe to realtime changes in Supabase
   const subscribeToRealtime = () => {
     return supabase
       .channel("todos")
@@ -77,18 +79,9 @@ export default function TodoListScreen() {
       .subscribe();
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchTodos();
-      const channel = subscribeToRealtime();
-      return () => {
-        channel.unsubscribe();
-      };
-    }, [])
-  );
-
-  const addTodo = async () => {
-    const trimmed = newTodo.trim();
+  // Add a new todo
+  const addTodo = async (newTodoText: string, setNewTodo: React.Dispatch<React.SetStateAction<string>>) => {
+    const trimmed = newTodoText.trim();
     if (!trimmed) return;
     try {
       const { data, error } = await supabase
@@ -105,6 +98,7 @@ export default function TodoListScreen() {
     }
   };
 
+  // Toggle completed status of a todo
   const toggleTodo = async (id: string) => {
     const todo = todos.find((t) => t.id === id);
     if (!todo) return;
@@ -123,6 +117,7 @@ export default function TodoListScreen() {
     }
   };
 
+  // Delete a todo
   const deleteTodo = async (id: string) => {
     try {
       const { error } = await supabase.from("todos").delete().eq("id", id);
@@ -132,6 +127,45 @@ export default function TodoListScreen() {
       Alert.alert("Error", (error as Error).message || "Failed to delete todo");
     }
   };
+
+  return {
+    todos,
+    loading,
+    refreshing,
+    setRefreshing,
+    fetchTodos,
+    subscribeToRealtime,
+    addTodo,
+    toggleTodo,
+    deleteTodo,
+  };
+}
+
+export default function TodoListScreen() {
+  const [newTodo, setNewTodo] = useState("");
+
+  // Use custom hook for todo logic
+  const {
+    todos,
+    loading,
+    refreshing,
+    setRefreshing,
+    fetchTodos,
+    subscribeToRealtime,
+    addTodo,
+    toggleTodo,
+    deleteTodo,
+  } = useTodos();
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchTodos();
+      const channel = subscribeToRealtime();
+      return () => {
+        channel.unsubscribe();
+      };
+    }, [])
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -157,23 +191,28 @@ export default function TodoListScreen() {
       </View>
 
       {/* Input for task with + button */}
-      <AddTodoInput newTodo={newTodo} setNewTodo={setNewTodo} addTodo={addTodo} />
+      <AddTodoInput newTodo={newTodo} setNewTodo={setNewTodo} addTodo={() => addTodo(newTodo, setNewTodo)} />
 
       {/* Stats and Clear Completed */}
       <View style={styles.statsContainer}>
         <Text style={styles.statsText}>Total: {todos.length}</Text>
-        <TouchableOpacity onPress={() => {
-          const completedIds = todos.filter(t => t.completed).map(t => t.id);
-          Promise.all(
-            completedIds.map(id =>
-              supabase.from("todos").delete().eq("id", id)
+        <TouchableOpacity
+          onPress={() => {
+            const completedIds = todos.filter((t) => t.completed).map((t) => t.id);
+            Promise.all(
+              completedIds.map((id) =>
+                supabase.from("todos").delete().eq("id", id)
+              )
             )
-          ).then(() => {
-            setTodos(prev => prev.filter(t => !t.completed));
-          }).catch(error => {
-            Alert.alert("Error", (error as Error).message || "Failed to clear completed todos");
-          });
-        }}>
+              .then(() => {
+                // Update state after deletion
+                deleteCompletedTodos();
+              })
+              .catch((error) => {
+                Alert.alert("Error", (error as Error).message || "Failed to clear completed todos");
+              });
+          }}
+        >
           <Text style={styles.clearText}>Clear Completed</Text>
         </TouchableOpacity>
       </View>
@@ -193,7 +232,20 @@ export default function TodoListScreen() {
       </View>
     </SafeAreaView>
   );
+
+  // Helper to remove completed todos from state after deletion
+  function deleteCompletedTodos() {
+    // Filter out completed todos
+    const filteredTodos = todos.filter((t) => !t.completed);
+    // Update state
+    // Using setTodos from useTodos is not directly accessible here,
+    // so we can update by refetching or by setting state here if exposed.
+    // For simplicity, refetch todos
+    fetchTodos();
+  }
 }
+
+// Components
 
 const AddTodoInput = React.memo(function AddTodoInput({
   newTodo,
@@ -225,7 +277,7 @@ const AddTodoInput = React.memo(function AddTodoInput({
   );
 });
 
-const TodoItem = ({
+const TodoItem = React.memo(({
   item,
   toggleTodo,
   deleteTodo,
@@ -251,7 +303,7 @@ const TodoItem = ({
       <Ionicons name="trash-outline" size={20} color="#ff6b6b" />
     </TouchableOpacity>
   </View>
-);
+));
 
 const TodoList = React.memo(({
   todos,
